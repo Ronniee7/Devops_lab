@@ -1,27 +1,29 @@
 
 from fastapi import FastAPI
 from datetime import datetime, timezone
+from app.core.config import settings
 
 app = FastAPI(
-    title="DevOps Lab API",
-    description="A production-oriented API built through a 30-day DevOps engineering challenge.",
-    version="0.1.0",
+    title=settings.APP_NAME,
+    description="A production-oriented API built through a 30 day DEVOPS Challenge.",
+    version=settings.APP_VERSION,
+    debug=settings.DEBUG,
 )
-
 
 @app.get("/")
 async def root():
     return {
-        "message": "Welcome to DevOps Lab",
-        "application": "DevOps Lab API",
-        "version": "0.1.0",
+        "message": "Welcome to Devops Lab",
+        "application": settings.APP_NAME,
+        "version":settings.APP_VERSION,
+        "environment":settings.APP_ENV,
         "status": "running",
+    
     }
-
-
 @app.get("/health")
 async def health_check():
     return {
-        "status": "healthy",
+        "status": "health",
         "timestamp": datetime.now(timezone.utc).isoformat(),
+        "environment": settings.APP_ENV,        
     }
