@@ -21,7 +21,11 @@ venv/
 .coverage
 htmlcov/
 
+
 # Operating system
 .DS_Store
 Thumbs.db
 '@ | Set-Content .gitignore
+
+# Ruff
+.ruff_cache/
