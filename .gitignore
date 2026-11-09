@@ -29,3 +29,6 @@ Thumbs.db
 
 # Ruff
 .ruff_cache/
+
+#notes
+~$Notes.docx
