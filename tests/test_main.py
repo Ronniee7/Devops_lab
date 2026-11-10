@@ -64,3 +64,34 @@ def test_health_rejects_unsupported_method(client: TestClient):
     response = client.post("/health")
 
     assert response.status_code == 405
+
+
+def test_liveness_endpoint(client: TestClient):
+    response = client.get("/health/live")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "status": "alive",
+    }
+
+
+def test_readiness_endpoint(client: TestClient):
+    response = client.get("/health/ready")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "status": "ready",
+    }
+
+
+def test_readiness_returns_503_when_application_is_not_ready(
+    client: TestClient,
+):
+    client.app.state.ready = False
+
+    response = client.get("/health/ready")
+
+    assert response.status_code == 503
+    assert response.json() == {
+        "detail": "Application is not ready",
+    }

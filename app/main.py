@@ -1,33 +1,55 @@
-
 import logging
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from time import perf_counter
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 
 from app.core.config import settings
 from app.core.logging import configure_logging
 
-
-# Initialize logging before creating the application.
 configure_logging(settings.LOG_LEVEL)
-
 logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    """
+    Manage application startup and shutdown operations.
+    """
+
+    logger.info(
+        "Application starting | name=%s | environment=%s",
+        settings.APP_NAME,
+        settings.APP_ENV,
+    )
+
+    app.state.ready = True
+
+    yield
+
+    app.state.ready = False
+
+    logger.info(
+        "Application shutting down | name=%s",
+        settings.APP_NAME,
+    )
 
 
 app = FastAPI(
     title=settings.APP_NAME,
-    description="A production-oriented API built through a 30-day DevOps challenge.",
+    description=("A production-oriented API built through a 30-day DevOps challenge."),
     version=settings.APP_VERSION,
     debug=settings.DEBUG,
+    lifespan=lifespan,
 )
 
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     """
-    Log incoming HTTP requests, response status codes,
-    and request processing time.
+    Log incoming HTTP requests and their response times.
     """
 
     start_time = perf_counter()
@@ -60,17 +82,12 @@ async def log_requests(request: Request, call_next):
         raise
 
 
-@app.on_event("startup")
-async def application_startup():
-    logger.info(
-        "Application starting | name=%s | environment=%s",
-        settings.APP_NAME,
-        settings.APP_ENV,
-    )
-
-
 @app.get("/")
 async def root():
+    """
+    Return application information.
+    """
+
     logger.info("Root endpoint accessed")
 
     return {
@@ -84,8 +101,40 @@ async def root():
 
 @app.get("/health")
 async def health_check():
+    """
+    Return general application health information.
+    """
+
     return {
         "status": "healthy",
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "environment": settings.APP_ENV,
+    }
+
+
+@app.get("/health/live")
+async def liveness_check():
+    """
+    Confirm that the application process is responding.
+    """
+
+    return {
+        "status": "alive",
+    }
+
+
+@app.get("/health/ready")
+async def readiness_check(request: Request):
+    """
+    Confirm that the application is ready to accept traffic.
+    """
+
+    if not request.app.state.ready:
+        raise HTTPException(
+            status_code=503,
+            detail="Application is not ready",
+        )
+
+    return {
+        "status": "ready",
     }
