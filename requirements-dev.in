@@ -1,0 +1,16 @@
+
+# Include production dependencies and their version constraints
+-r requirements.in
+-c requirements.txt
+
+# Testing
+pytest>=8.0,<10.0
+httpx>=0.27,<1.0
+pytest-cov>=6.0,<8.0
+
+# Code quality
+ruff>=0.11,<1.0
+
+# Dependency management and security
+pip-tools>=7.4,<8.0
+pip-audit>=2.7,<3.0
