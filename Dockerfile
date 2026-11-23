@@ -11,11 +11,7 @@ ENV PYTHONUNBUFFERED=1
 # Set the application working directory.
 WORKDIR /app
 
-# Install system dependencies required for package installation.
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        build-essential \
-    && rm -rf /var/lib/apt/lists/*
+
 
 # Copy dependency definitions first.
 # This allows Docker to reuse the dependency layer when

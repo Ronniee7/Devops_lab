@@ -111,6 +111,14 @@ pluggy==1.7.0
     # via
     #   pytest
     #   pytest-cov
+psycopg[binary]==3.3.9
+    # via
+    #   -c requirements.txt
+    #   -r requirements.in
+psycopg-binary==3.3.9
+    # via
+    #   -c requirements.txt
+    #   psycopg
 py-serializable==2.2.0
     # via cyclonedx-python-lib
 pydantic==2.14.3
@@ -185,6 +193,10 @@ typing-inspection==0.4.5
     #   fastapi
     #   pydantic
     #   pydantic-settings
+tzdata==2026.6
+    # via
+    #   -c requirements.txt
+    #   psycopg
 urllib3==2.8.0
     # via requests
 uvicorn[standard]==0.54.0
