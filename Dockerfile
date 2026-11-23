@@ -25,6 +25,9 @@ RUN python -m pip install --no-cache-dir --upgrade pip \
 # Copy application source code.
 COPY app/ ./app/
 
+COPY alembic.ini .
+COPY alembic/ ./alembic/
+
 # Create a non-root user for better security.
 RUN addgroup --system appgroup \
     && adduser --system --ingroup appgroup appuser \
