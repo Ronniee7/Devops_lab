@@ -1,5 +1,11 @@
 # DevOps Lab
 
+# DevOps Lab
+
+![CI](https://github.com/Ronniee7/Devops_lab/actions/workflows/ci.yml/badge.svg)
+
+  
+
 ![Python](https://img.shields.io/badge/Python-3.14-blue?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688?logo=fastapi&logoColor=white)
 ![Git](https://img.shields.io/badge/Git-Version_Control-F05032?logo=git&logoColor=white)

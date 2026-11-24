@@ -81,6 +81,7 @@ def test_readiness_endpoint(client: TestClient):
     assert response.status_code == 200
     assert response.json() == {
         "status": "ready",
+        "database": "connected",
     }
 
 
@@ -94,4 +95,14 @@ def test_readiness_returns_503_when_application_is_not_ready(
     assert response.status_code == 503
     assert response.json() == {
         "detail": "Application is not ready",
+    }
+
+
+def test_readiness_checks_database(client):
+    response = client.get("/health/ready")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "status": "ready",
+        "database": "connected",
     }

@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
+from app.core.exceptions import handle_database_error
 from app.db.session import get_db
 from app.models.task import Task
 from app.schemas.task import TaskCreate, TaskResponse, TaskUpdate
@@ -26,9 +28,13 @@ def create_task(
         description=task_data.description,
     )
 
-    db.add(task)
-    db.commit()
-    db.refresh(task)
+    try:
+        db.add(task)
+        db.commit()
+        db.refresh(task)
+    except SQLAlchemyError as exc:
+        db.rollback()
+        raise handle_database_error(exc) from exc
 
     return task
 
@@ -41,7 +47,6 @@ def get_tasks(
     db: Session = Depends(get_db),
 ):
     statement = select(Task).order_by(Task.id)
-
     return db.scalars(statement).all()
 
 

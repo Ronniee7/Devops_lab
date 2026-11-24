@@ -4,11 +4,15 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from time import perf_counter
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
 
 from app.api.v1 import api_router
 from app.core.config import settings
 from app.core.logging import configure_logging
+from app.db.session import engine, get_db
 
 configure_logging(settings.LOG_LEVEL)
 logger = logging.getLogger(__name__)
@@ -16,10 +20,6 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    """
-    Manage application startup and shutdown operations.
-    """
-
     logger.info(
         "Application starting | name=%s | environment=%s",
         settings.APP_NAME,
@@ -31,6 +31,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     yield
 
     app.state.ready = False
+    engine.dispose()
 
     logger.info(
         "Application shutting down | name=%s",
@@ -130,17 +131,28 @@ async def liveness_check():
 
 
 @app.get("/health/ready")
-async def readiness_check(request: Request):
-    """
-    Confirm that the application is ready to accept traffic.
-    """
-
+async def readiness_check(
+    request: Request,
+    db: Session = Depends(get_db),
+):
     if not request.app.state.ready:
         raise HTTPException(
             status_code=503,
             detail="Application is not ready",
         )
 
+    try:
+        db.execute(text("SELECT 1"))
+
+    except SQLAlchemyError:
+        logger.exception("Database readiness check failed")
+
+        raise HTTPException(
+            status_code=503,
+            detail="Database is unavailable",
+        )
+
     return {
         "status": "ready",
+        "database": "connected",
     }
