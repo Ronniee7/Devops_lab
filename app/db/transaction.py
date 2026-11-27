@@ -3,7 +3,6 @@ from typing import TypeVar
 
 from sqlalchemy.orm import Session
 
-
 T = TypeVar("T")
 
 

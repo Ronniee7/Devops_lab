@@ -3,7 +3,6 @@ import logging
 from fastapi import HTTPException, status
 from sqlalchemy.exc import SQLAlchemyError
 
-
 logger = logging.getLogger(__name__)
 
 
